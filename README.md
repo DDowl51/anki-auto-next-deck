@@ -21,6 +21,12 @@ An Anki add-on that lets you move on to the next deck from the "Congratulations"
 
 Add-on page: <https://ankiweb.net/shared/info/1855134110>
 
+### From a file
+
+1. Download `Auto_Next_Deck-<version>.ankiaddon` from the [latest release](https://github.com/DDowl51/anki-auto-next-deck/releases/latest).
+2. In Anki, open **Tools → Add-ons → Install from file...** and select the downloaded file.
+3. Restart Anki.
+
 ### From source
 
 Clone this repository into your Anki add-ons folder and restart Anki:
@@ -36,7 +42,7 @@ cd ~/.local/share/Anki2/addons21
 git clone https://github.com/DDowl51/anki-auto-next-deck.git
 ```
 
-If you have the AnkiWeb version installed, disable it first so the two copies don't run at the same time.
+When installing from a file or from source, if you have the AnkiWeb version installed, disable it first so the two copies don't run at the same time.
 
 ## Usage
 
@@ -82,4 +88,4 @@ Contanki's **Forward** action is not supported yet.
 
 ## License
 
-[AGPL-3.0-only](https://www.gnu.org/licenses/agpl-3.0.html)
+[AGPL-3.0-only](LICENSE)

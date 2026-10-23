@@ -21,6 +21,12 @@ Anki 插件。学完一个牌组后，在「恭喜」页面按一个键即可进
 
 插件页面：<https://ankiweb.net/shared/info/1855134110>
 
+### 从文件安装
+
+1. 从 [最新 Release](https://github.com/DDowl51/anki-auto-next-deck/releases/latest) 下载 `Auto_Next_Deck-<版本号>.ankiaddon`。
+2. 在 Anki 中打开 **工具 → 插件 → 从文件安装...**，选择下载的文件。
+3. 重启 Anki。
+
 ### 从源码安装
 
 将本仓库克隆到 Anki 插件目录，然后重启 Anki：
@@ -36,7 +42,7 @@ cd ~/.local/share/Anki2/addons21
 git clone https://github.com/DDowl51/anki-auto-next-deck.git
 ```
 
-如果已安装 AnkiWeb 版本，请先将其停用，避免两份同时运行。
+通过文件或源码安装时，如果已安装 AnkiWeb 版本，请先将其停用，避免两份同时运行。
 
 ## 使用
 
@@ -82,4 +88,4 @@ git clone https://github.com/DDowl51/anki-auto-next-deck.git
 
 ## 许可证
 
-[AGPL-3.0-only](https://www.gnu.org/licenses/agpl-3.0.html)
+[AGPL-3.0-only](LICENSE)
