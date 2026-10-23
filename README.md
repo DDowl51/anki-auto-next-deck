@@ -1,82 +1,85 @@
 # Auto Next Deck
 
-**After finishing a deck, press Space to jump to the next deck — no mouse needed.**
+English | [简体中文](README.zh-CN.md)
 
-Tired of finishing a deck and having to manually navigate back to the deck list, scroll, click the next deck, and click "Study"? This addon makes the flow seamless:
+An Anki add-on that lets you move on to the next deck from the "Congratulations" screen with a single key, instead of going back to the deck list.
 
-## How it works
+## Features
 
-```
-复习完 Deck A → 停在 A 的 "Congratulations" 页面
-     ↓ 按空格 (Space)
-跳到 Deck B 的概览页面（显示待复习数量 + "Study" 按钮）
-     ↓ 再按空格 (Space)
-开始复习 Deck B
-```
-
-- **First Space** — switches to the alphabetically next deck that has cards due
-- **Second Space** — starts reviewing that deck (normal behavior)
-- Stays on the finished deck until you explicitly press Space — no auto-switch surprises
+- Press <kbd>Space</kbd> or <kbd>Enter</kbd> on the "Congratulations" screen to open the next deck that has cards due.
+- Nothing happens automatically: the add-on only switches decks when you press the key.
+- Works with game controllers via [Contanki](https://ankiweb.net/shared/info/1898790263).
+- No settings, no extra UI.
 
 ## Installation
 
-### Via .ankiaddon (recommended)
-1. Download `Auto_Next_Deck.ankiaddon`
-2. In Anki: **Tools → Add-ons → Install from file...**
-3. Select the `.ankiaddon` file
-4. Restart Anki
+### AnkiWeb (recommended)
 
-### Manual
-1. Copy the `auto_next_deck` folder into your Anki `addons21` directory:
-   - **Windows**: `%APPDATA%\Anki2\addons21\`
-   - **macOS**: `~/Library/Application Support/Anki2/addons21/`
-   - **Linux**: `~/.local/share/Anki2/addons21/`
-2. Restart Anki
+1. In Anki, open **Tools → Add-ons → Get Add-ons...**
+2. Enter the code `1855134110`.
+3. Restart Anki.
+
+Add-on page: <https://ankiweb.net/shared/info/1855134110>
+
+### From source
+
+Clone this repository into your Anki add-ons folder and restart Anki:
+
+| OS      | Add-ons folder                                |
+| ------- | --------------------------------------------- |
+| Windows | `%APPDATA%\Anki2\addons21\`                   |
+| macOS   | `~/Library/Application Support/Anki2/addons21/` |
+| Linux   | `~/.local/share/Anki2/addons21/`              |
+
+```sh
+cd ~/.local/share/Anki2/addons21
+git clone https://github.com/DDowl51/anki-auto-next-deck.git
+```
+
+If you have the AnkiWeb version installed, disable it first so the two copies don't run at the same time.
 
 ## Usage
 
-1. Study a deck as normal
-2. When you review the last card, Anki shows the "Congratulations" screen
-3. Press **Space** (or **Enter**) to jump to the next deck's overview
-4. Press **Space** again to start studying
+1. Study a deck until Anki shows the "Congratulations" screen.
+2. Press <kbd>Space</kbd>. Anki opens the overview of the next deck.
+3. Press <kbd>Space</kbd> again to start studying it.
 
-That's it. No new UI, no settings to configure.
+If no later deck has cards due, <kbd>Space</kbd> behaves as it normally does.
 
-## Game controllers (Contanki)
+### Which deck is "next"
 
-Works with [Contanki](https://ankiweb.net/shared/info/1898790263): on the
-"Congratulations" screen, the controller's **Select / Enter** action (A button
-by default) behaves like Space — first press jumps to the next deck's
-overview, the next press starts studying.
+- Decks are ordered by full name (for example `Parent::Child`), case-insensitive.
+- The search starts after the deck you just finished and does not wrap around.
+- Filtered decks and decks with no cards due are skipped.
 
-## Deck ordering
+### Game controllers
 
-Decks are traversed in **case-insensitive alphabetical order** by name.
-Subdecks (e.g. `Parent::Child`) are included and sorted by their full path name.
+With Contanki, use the **Select** or **Enter** action (the A button in the default profile) on the "Congratulations" screen. It does the same as <kbd>Space</kbd>.
 
-- Filtered (cram) decks are **skipped**
-- Decks with **zero due cards** are **skipped**
-- If no decks remain, Space works normally (shows "No cards are due yet")
+Contanki's **Forward** action is not supported yet.
 
-## Technical details
+## Compatibility
 
-- Hooks into `gui_hooks.state_will_change` to detect review→overview transitions
-- Uses `gui_hooks.state_shortcuts_will_change` to inject a Qt-level Space shortcut that fires before the webview's "Study" handler
-- Controller support: on the congrats page, a listener catches synthetic clicks on `<body>` (`isTrusted == false`, which is what Contanki's Select action produces) and routes them through `pycmd` to the same logic as Space. Real mouse clicks are ignored
-- No external dependencies — pure Python, standard Anki addon API
+- Anki 2.1.45 or later. Tested on Anki 26.09.
+- Because <kbd>Space</kbd> and <kbd>Enter</kbd> are handled at the Qt level on the deck overview screen, they start studying even when the page doesn't have keyboard focus. Other add-ons that bind these keys on the overview screen may conflict.
+
+## How it works
+
+- Listens to `gui_hooks.state_will_change` to detect the move from review to the overview screen, and remembers which deck was finished.
+- Registers <kbd>Space</kbd> and <kbd>Enter</kbd> through `gui_hooks.state_shortcuts_will_change`. When a key is pressed, the add-on switches decks only if the current deck is still the one just finished; otherwise it starts studying.
+- Contanki sends clicks to the page instead of key presses. On the "Congratulations" page the add-on installs a listener that catches synthetic clicks on `<body>` (`isTrusted === false`) and passes them to the same handler through `pycmd`. Real mouse clicks are not affected.
 
 ## Changelog
 
 ### 1.1.0
-- Game controller support (Contanki): the Select / Enter action on the
-  "Congratulations" screen now jumps to the next deck, just like Space
-- Fix: after switching to another deck from the "Congratulations" screen
-  by other means (e.g. Contanki's "Next Due Deck"), Space now starts studying
-  that deck instead of skipping it
+
+- Added game controller support for Contanki's Select / Enter actions.
+- Fixed: after switching decks from the "Congratulations" screen in some other way (for example Contanki's "Next Due Deck"), <kbd>Space</kbd> skipped that deck instead of starting it.
 
 ### 1.0.0
-- Initial release
+
+- Initial release.
 
 ## License
 
-AGPL-3.0-only
+[AGPL-3.0-only](https://www.gnu.org/licenses/agpl-3.0.html)
