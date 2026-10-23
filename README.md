@@ -65,6 +65,18 @@ Subdecks (e.g. `Parent::Child`) are included and sorted by their full path name.
 - Controller support: on the congrats page, a listener catches synthetic clicks on `<body>` (`isTrusted == false`, which is what Contanki's Select action produces) and routes them through `pycmd` to the same logic as Space. Real mouse clicks are ignored
 - No external dependencies — pure Python, standard Anki addon API
 
+## Changelog
+
+### 1.1.0
+- Game controller support (Contanki): the Select / Enter action on the
+  "Congratulations" screen now jumps to the next deck, just like Space
+- Fix: after switching to another deck from the "Congratulations" screen
+  by other means (e.g. Contanki's "Next Due Deck"), Space now starts studying
+  that deck instead of skipping it
+
+### 1.0.0
+- Initial release
+
 ## License
 
 AGPL-3.0-only
