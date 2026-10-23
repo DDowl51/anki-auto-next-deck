@@ -42,6 +42,13 @@ Tired of finishing a deck and having to manually navigate back to the deck list,
 
 That's it. No new UI, no settings to configure.
 
+## Game controllers (Contanki)
+
+Works with [Contanki](https://ankiweb.net/shared/info/1898790263): on the
+"Congratulations" screen, the controller's **Select / Enter** action (A button
+by default) behaves like Space — first press jumps to the next deck's
+overview, the next press starts studying.
+
 ## Deck ordering
 
 Decks are traversed in **case-insensitive alphabetical order** by name.
@@ -55,6 +62,7 @@ Subdecks (e.g. `Parent::Child`) are included and sorted by their full path name.
 
 - Hooks into `gui_hooks.state_will_change` to detect review→overview transitions
 - Uses `gui_hooks.state_shortcuts_will_change` to inject a Qt-level Space shortcut that fires before the webview's "Study" handler
+- Controller support: on the congrats page, a listener catches synthetic clicks on `<body>` (`isTrusted == false`, which is what Contanki's Select action produces) and routes them through `pycmd` to the same logic as Space. Real mouse clicks are ignored
 - No external dependencies — pure Python, standard Anki addon API
 
 ## License

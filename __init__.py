@@ -114,6 +114,46 @@ def _switch_to_next_deck() -> None:
     mw.moveToState("overview")
 
 
+# ---- controller support (e.g. Contanki) ----
+# Controller add-ons don't send real key presses, so the Qt shortcuts above
+# never fire. Contanki's "Select"/"Enter" actions run
+# `document.activeElement.click()` in the main webview; on the congrats page
+# the active element is <body>. Catch that synthetic click (isTrusted=false;
+# real mouse clicks are trusted) and route it to the same Space logic.
+_BRIDGE_CMD = "auto_next_deck:next"
+
+_CLICK_LISTENER_JS = f"""
+(() => {{
+  if (window.__autoNextDeckInstalled) return;
+  window.__autoNextDeckInstalled = true;
+  document.addEventListener("click", (e) => {{
+    if (e.isTrusted) return;
+    if (e.target !== document.body && e.target !== document.documentElement) return;
+    pycmd("{_BRIDGE_CMD}");
+  }}, true);
+}})();
+"""
+
+
+def on_webview_did_inject_style_into_page(webview) -> None:
+    """Install the click listener on the main webview's overview pages.
+
+    Uses page().runJavaScript() directly: webview.eval() queues until the
+    page reports domDone, which the SvelteKit congrats page never does.
+    """
+    if webview is not mw.web or mw.state != "overview":
+        return
+    webview.page().runJavaScript(_CLICK_LISTENER_JS)
+
+
+def on_webview_did_receive_js_message(handled: tuple, message: str, context):
+    if message != _BRIDGE_CMD:
+        return handled
+    if mw.state == "overview":
+        on_overview_key()
+    return (True, None)
+
+
 # ---- deck navigation helpers ----
 def _find_next_deck_with_cards(current_deck_id: int) -> int | None:
     """Find the alphabetically-next deck with cards to study.
@@ -171,3 +211,5 @@ def _deck_has_due_cards(deck_id: int) -> bool:
 gui_hooks.reviewer_did_show_question.append(on_reviewer_did_show_question)
 gui_hooks.state_will_change.append(on_state_will_change)
 gui_hooks.state_shortcuts_will_change.append(on_state_shortcuts_will_change)
+gui_hooks.webview_did_inject_style_into_page.append(on_webview_did_inject_style_into_page)
+gui_hooks.webview_did_receive_js_message.append(on_webview_did_receive_js_message)
