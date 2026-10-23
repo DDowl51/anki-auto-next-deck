@@ -1,0 +1,1 @@
+{"package": "auto_next_deck", "name": "Auto Next Deck", "version": "1.0.0", "human_version": "1.0.0", "description": "After finishing a deck, press Space to jump to the next deck instead of staying on the completed deck's overview.", "author": "", "license": "AGPL-3.0-only", "conflicts": [], "min_point_version": 45, "max_point_version": 99}
