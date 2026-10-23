@@ -44,9 +44,7 @@ def on_state_will_change(new_state: str, old_state: str) -> None:
         _next_deck_id = _find_next_deck_with_cards(_finished_deck_id)
 
     elif new_state == "deckBrowser":
-        _just_finished = False
-        _finished_deck_id = None
-        _next_deck_id = None
+        _clear_finished_state()
 
 
 # ---- shortcut handling ----
@@ -54,49 +52,66 @@ def on_state_shortcuts_will_change(state: str, shortcuts: list) -> None:
     """
     On overview: always handle Space/Enter at Qt level.
 
-    - Just finished a deck (has _next_deck_id) -> switch to next deck
-    - Normal overview -> start review (mw.onStudyKey)
+    The decision is made at key-press time (see on_overview_key), because
+    the deck can change while the overview stays open.
     """
-    global _just_finished, _finished_deck_id, _next_deck_id
-
     if state != "overview":
         return
 
-    if _just_finished and _next_deck_id is not None:
-        # ---- Mode 1: Deck just finished, Space = jump to next deck ----
-        deck_id_to_switch = _next_deck_id
+    # Qt-level shortcuts fire before webview handlers, so Space works
+    # regardless of webview focus state.
+    shortcuts.insert(0, (" ", on_overview_key))
+    shortcuts.insert(0, ("return", on_overview_key))
 
-        def switch_to_next_deck() -> None:
-            global _just_finished, _finished_deck_id, _next_deck_id
-            _just_finished = False
-            _finished_deck_id = None
-            _next_deck_id = None
 
-            mw.col.decks.select(deck_id_to_switch)
-
-            next_deck = mw.col.decks.get(deck_id_to_switch)
-            if next_deck:
-                tooltip(
-                    f"Next deck: {next_deck['name']}\nPress Space again to start",
-                    period=2500,
-                )
-
-            mw.moveToState("overview")
-
-        shortcuts.insert(0, (" ", switch_to_next_deck))
-        shortcuts.insert(0, ("return", switch_to_next_deck))
-
+def on_overview_key() -> None:
+    """
+    - Still on the deck we just finished, and a next deck exists
+      -> switch to the next deck's overview
+    - Otherwise -> start review (mw.onStudyKey)
+    """
+    if _is_on_finished_deck() and _next_deck_id is not None:
+        _switch_to_next_deck()
     else:
-        # ---- Mode 2: Normal overview, Space = start review ----
-        # This ensures Space always works on the overview, regardless of
-        # webview focus state. Qt-level shortcuts fire before webview handlers.
-        shortcuts.insert(0, (" ", mw.onStudyKey))
-        shortcuts.insert(0, ("return", mw.onStudyKey))
+        _clear_finished_state()
+        mw.onStudyKey()
 
-        # If the just finished flag was stale (no next deck found), clean it up
-        if _just_finished:
-            _just_finished = False
-            _finished_deck_id = None
+
+def _is_on_finished_deck() -> bool:
+    """True if we just finished a deck and are still on that deck.
+
+    If the user switched decks some other way (e.g. a controller add-on
+    selecting another deck from the congrats screen), the finished state
+    is stale and must not hijack Space.
+    """
+    return (
+        _just_finished
+        and _finished_deck_id is not None
+        and mw.col.decks.get_current_id() == _finished_deck_id
+    )
+
+
+def _clear_finished_state() -> None:
+    global _just_finished, _finished_deck_id, _next_deck_id
+    _just_finished = False
+    _finished_deck_id = None
+    _next_deck_id = None
+
+
+def _switch_to_next_deck() -> None:
+    deck_id_to_switch = _next_deck_id
+    _clear_finished_state()
+
+    mw.col.decks.select(deck_id_to_switch)
+
+    next_deck = mw.col.decks.get(deck_id_to_switch)
+    if next_deck:
+        tooltip(
+            f"Next deck: {next_deck['name']}\nPress Space again to start",
+            period=2500,
+        )
+
+    mw.moveToState("overview")
 
 
 # ---- deck navigation helpers ----
